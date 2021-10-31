@@ -1,0 +1,120 @@
+<script>
+    var slideIndex = 1;
+    showDivs(slideIndex);
+    
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+    
+    function showDivs(n) {
+      var i;
+      var x = document.getElementsByClassName("schedule");
+      if (n > x.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = x.length}
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";  
+      }
+      x[slideIndex-1].style.display = "block";  
+    }
+</script>
+
+<h1 class="mt-4">Sign Up</h1>
+<a href="/student_dashboard" class="btn btn-info">My Schedule</a>
+<a href="/student_profile" class="btn btn-info" >Profile</a>
+<a href="/users/logout" class="btn btn-info" style="float:right; ">Logout</a>
+<p class="lead mb-3">
+    <strong style="background-color: #e0c0f3;">Purple = PRIVATE</strong> | 
+    <strong style="background-color:#a2d8fb;">Blue = GROUP</strong> | 
+    <strong style="background-color:#9cf094;">Green = AVAILABLE FOR EITHER</strong>
+</p>
+<%- include('./partials/messages'); %>
+<% const getDates = (num) => Date.today().setTimeToNow().add({ days: num }) %>
+<%# Show lesson or not? %>
+
+<% getTimeSlots = (day) => { %>
+    <td>
+        <% all_teacher_users.map(users => { %>
+            <%# if the teacher has available/group timeslots, display them %> <%# && (showLesson(timeslot.status, timeslot.students.length) === true) %>
+            <% if(users.schedule.filter(timeslot => (timeslot.day === day && (timeslot.students.length < timeslot.max_students))).length !== 0) { %>
+            <div style="padding: 5px; margin: 5px;">
+                <p style="margin: 5px;">
+                    <strong><%= users.user.name %>–</strong>
+                    <strong><%= users.user.edu === "teacher" ? "Teacher": "TA" %></strong>
+                </p>
+                <% users.schedule.filter((timeslot) => (timeslot.day === day) && (timeslot.students.length < timeslot.max_students)).map(timeslot => { %>
+                    <div class="<%= timeslot.status %>">
+                        <p>
+                            <%= timeslot.startTime %>–<%= timeslot.endTime %><br>
+                            <%= timeslot.students.length%>/<%= timeslot.max_students %> slots filled
+                            <br>Subject: <%= timeslot.subject %>
+                        </p>
+                        <% if(timeslot.students.length !== 0) { %>
+                                Students
+                                <% timeslot.students.map(student => { %>
+                                    <details>
+                                        <summary><%= student.name %></summary>
+                                        <p>
+                                            WCLS grade: <%= student.wcls_grade %><br>
+                                            Regular grade: <%= student.reg_grade %>
+                                        </p>   
+                                    </details>
+                                <% }) %>  
+                        <% } %>
+                        <form action="/signup" method="POST" style="margin: 10px 0px;">
+                            <% if (timeslot.status === "group") { %>
+                                <input style="display:none" name='status' value='group'/>
+                            <% } %>
+                            <% if (timeslot.status === "private") { %>
+                                <input style="display:none" name='status' value='private'/>
+                            <% } %>
+                            <% if (timeslot.status === "available") { %>
+                            <select name="status" style="height: 40px;">
+                                <option value="">Type of Lesson</option>
+                                <option value="private">Private</option>
+                                <option value="group">Group</option> 
+                            </select> 
+                            <% } %>
+                            <div style="display: none">
+                                <input type='name' name='day' value='<%= timeslot.day %>' /> 
+                                <input type='name' name='startTime' value='<%= timeslot.startTime %>'/>
+                                <input type='name' name='_id' value='<%= users._id %>'/>   
+                                <input type='name' name='subject' value='<%= timeslot.subject %>'/>
+                            </div>
+                            <button type="submit" style="height: 40px;" class="btn btn-info">Sign up</button>
+                        </form>
+                    </div>
+                <% }) %>
+            </div>
+        <% }}) %>
+    </td>
+<% } %>
+<div class="w3-content w3-display-container" style="text-align: center;">
+    <div class="schedule">
+        <h3>Week <%= getDates(0).toString("M/d") %> to <%= getDates(6).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers'); %>
+            <tr>
+                <% for(let i = 0; i < 7; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div class="schedule" style="display: none;">
+        <h3>Week <%= getDates(7).toString("M/d") %> to <%= getDates(13).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers2'); %>
+            <tr>
+                <% for(let i = 7; i < 14; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div style="text-align: center">
+        <button class="btn btn-info" onclick="plusDivs(-1)">&#10094;</button>
+        <button class="btn btn-info" onclick="plusDivs(1)">&#10095;</button>
+    </div>
+</div>
+<%- include('./partials/footer'); %>
+    

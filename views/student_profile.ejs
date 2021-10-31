@@ -1,0 +1,32 @@
+<h1 class="mt-4"><%= user.name %>'s Profile</h1>
+<a href="/student_dashboard" class="btn btn-info" >Schedule</a>
+<a href="/signup" class="btn btn-info" >Sign Up</a>
+<a href="/users/logout" class="btn btn-info" style="float:right;">Logout</a>
+<p class="lead mb-3">Name: <%= user.name %></p>
+<p class="lead mb-3">Email: <%= user.email %></p>
+<form action="/student_profile" method="POST">
+    <div class="form-group">
+      <label for="name" class="lead mb-3">Grade at WCLS (Ex: ICL2)</label>
+      <input
+        type="name"
+        id="wcls_grade"
+        name="wcls_grade"
+        class="form-control"
+        placeholder="Enter Grade at WCLS"
+        value="<%= user.wcls_grade %>"
+      />
+    </div>
+    <div class="form-group">
+      <label for="reg_grade" class="lead mb-3">Grade at Regular School (Ex: 9)</label>
+      <input
+        type="name"
+        id="reg_grade"
+        name="reg_grade"
+        class="form-control"
+        placeholder="Enter Grade at Regular School"
+        value="<%= user.reg_grade %>"
+      />
+    </div>
+    <button type="submit" class="btn btn-info btn-block">Save</button>
+  </form>
+  <%- include('./partials/footer'); %>

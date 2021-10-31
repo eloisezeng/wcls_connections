@@ -1,0 +1,79 @@
+<script>
+    var slideIndex = 1;
+    showDivs(slideIndex);
+    
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+    
+    function showDivs(n) {
+      var i;
+      var x = document.getElementsByClassName("schedule");
+      if (n > x.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = x.length}
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";  
+      }
+      x[slideIndex-1].style.display = "block";  
+    }
+</script>
+
+<h1 class="mt-4"><%= name %>'s Schedule</h1>
+<a href="/signup" class="btn btn-info">Sign Up</a>
+<a href="/student_profile" class="btn btn-info">Profile</a>
+<a href="/users/logout" class="btn btn-info" style="float:right; ">Logout</a>
+<p class="lead mb-3">
+    <strong style="background-color: #e0c0f3;">Purple = PRIVATE</strong> | 
+    <strong style="background-color:#a2d8fb;">Blue = GROUP</strong>
+</p>
+<% const getDates = (num) => Date.today().setTimeToNow().add({ days: num }) %>
+<% getTimeSlots = (day) => { %>
+<td>
+    <% schedule.filter((timeslot) => timeslot.day === day).map(timeslot => { %>
+        <div class="<%= timeslot.status %>">
+            Teacher: <br>
+            <%= timeslot.name %><br>
+            <%= timeslot.startTime %>–<%= timeslot.endTime %>
+            <br>Subject: <%= timeslot.subject %>
+            Students
+            <% timeslot.students.map(student => { %>
+                <details>
+                    <summary><%= student.name %></summary>
+                    Grade at WCLS: <%= student.wcls_grade %><br>
+                    Regular School Grade: <%= student.reg_grade %>
+                    
+                </details>
+                <% }) %>
+        </div>
+    <% }) %>
+</td>
+<% } %>
+<div class="w3-content w3-display-container" style="text-align: center;">
+    <div class="schedule">
+        <h3>Week <%= getDates(0).toString("M/d") %> to <%= getDates(6).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers'); %>
+            <tr>
+                <% for(let i = 0; i < 7; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div class="schedule" style="display: none;">
+        <h3>Week <%= getDates(7).toString("M/d") %> to <%= getDates(13).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers2'); %>
+            <tr>
+                <% for(let i = 7; i < 14; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div style="text-align: center">
+        <button class="btn btn-info" onclick="plusDivs(-1)">&#10094;</button>
+        <button class="btn btn-info" onclick="plusDivs(1)">&#10095;</button>
+    </div>
+</div>
+<%- include('./partials/footer'); %>

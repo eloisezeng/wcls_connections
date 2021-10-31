@@ -1,0 +1,133 @@
+<%# Slideshow of schedules %>
+<script>
+  var slideIndex = 1;
+  showDivs(slideIndex);
+  
+  function plusDivs(n) {
+    showDivs(slideIndex += n);
+  }
+  
+  function showDivs(n) {
+    var i;
+    var x = document.getElementsByClassName("schedule");
+    if (n > x.length) {slideIndex = 1}
+    if (n < 1) {slideIndex = x.length}
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    x[slideIndex-1].style.display = "block";  
+  }
+</script>
+
+<h1 class="mt-4"><%= user.name %>'s Schedule</h1>
+<%- include('./partials/messages'); %>
+<% const getDates = (num) => Date.today().setTimeToNow().add({ days: num }) %>
+<%# Add timeslots %>
+<form action="/dashboard" method="POST" style="margin: 10px 0px; display: inline-block">
+    <select name="day" style="height: 40px;">
+        <option value="">Choose Day</option>
+        <% for(let i = 0; i < 13; i++) { %>
+            <option value="<%= getDates(i).toString("M/d/yyyy") %>"><%= getDates(i).toString("M/d")%>  <%= getDates(i).toString("ddd")%></option>
+        <% } %>
+    </select> 
+    <label for='startTime'>From: </label>
+    <input type='time' name='startTime' placeholder='Start Time: ' style="height: 40px;"/>
+    <label for='endTime'>To: </label>
+    <input type='time'name='endTime' placeholder='End Time: ' style="height: 40px;"/>  
+    <select name="status" style="height: 40px;">
+        <option value="">Type of Lesson</option>
+        <option value="available">Green: private/group</option>
+        <option value="private">Purple: private</option>
+        <option value="group">Blue: group</option>
+    </select> 
+    <input name='subject' placeholder='Subject' style="height: 40px;"/>
+    <button type="submit" class="btn btn-info">Add Timeslot</button>
+</form>
+<br>
+<form action="/max_students" method="POST" style="display: inline-block;">
+    <label for="max_students">Max # of students per lesson: </label>
+    <input
+    type="number"
+    id="max_students"
+    name="max_students"
+    class="form-control"
+    placeholder="Enter"
+    min="1"
+    max="20"
+    value="<%= user.max_students %>"
+    style="display: inline-block; width: 80px; color: black;"
+    />
+    <button type="submit" class="btn btn-info" style="display: inline-block">Save</button>
+</form>
+<a href="/users/logout" class="btn btn-info" style="display: inline-block;">Logout</a>
+
+<p class="lead mb-3">
+    <strong style="background-color: #e0c0f3;">Purple = PRIVATE</strong> | 
+    <strong style="background-color:#a2d8fb;">Blue = GROUP</strong> | 
+    <strong style="background-color:#9cf094;">Green = AVAILABLE FOR EITHER</strong>
+</p>
+
+<% const getTimeSlots = (day) => { %>
+    <td>
+        <% schedule.filter((timeslot) => timeslot.day === day).map(timeslot => { %>
+            <form action="/dashboard/delete" method="POST">
+                <div class="<%= timeslot.status %>">
+                    <p>
+                        <%= timeslot.startTime %>–<%= timeslot.endTime%>
+                        <br><%= timeslot.students.length%>/<%= timeslot.max_students %> slots filled
+                        <br>Subject: <%= timeslot.subject %>
+                    </p>
+                    <input name="day" value="<%= timeslot.day %>" style="display:none;"/>
+                    <input name="startTime" value="<%= timeslot.startTime %>" style="display:none;"/>
+                    <% if (timeslot.students.length !== 0) { %>
+                        Students
+                    <% } %>
+                    <% timeslot.students.map(student => { %>
+                        <details>
+                            <summary><%= student.name %></summary>
+                            <%= student.email %><br>
+                            WCLS Grade: <%= student.wcls_grade %><br>
+                            Regular Grade: <%= student.reg_grade %>
+                        </details>
+                        <% }) %>    
+                        <% if (timeslot.students.length === 0) { %>
+                            <button type="submit" style="background-color: transparent; border: none;"><i class="material-icons">delete</i></button>                    
+                        <% } %>
+                </div>  
+            </form>
+            <% }) %>
+    </td>
+<% } %>
+<div class="w3-content w3-display-container" style="text-align: center;">
+    <div class="schedule">
+        <h3>Week <%= getDates(0).toString("M/d") %> to <%= getDates(6).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers'); %>
+            <tr>
+                <% for(let i = 0; i < 7; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div class="schedule" style="display: none;">
+        <h3>Week <%= getDates(7).toString("M/d") %> to <%= getDates(13).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers2'); %>
+            <tr>
+                <% for(let i = 7; i < 14; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div> 
+    <div style="text-align: center;">
+        <button class="btn btn-info" onclick="plusDivs(-1)">&#10094;</button>
+        <button class="btn btn-info" onclick="plusDivs(1)">&#10095;</button>
+    </div>
+</div>
+<a href="/full_schedule" class="btn btn-info">Complete Teacher/Student Schedules</a>
+
+
+<%- include('./partials/footer'); %>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

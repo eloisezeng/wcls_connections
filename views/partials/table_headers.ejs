@@ -1,0 +1,6 @@
+<% const getDates = (num) => Date.today().setTimeToNow().add({ days: num }) %>
+<tr>
+    <% for(let i = 0; i < 7; i++) { %>
+        <th><%= getDates(i).toString("ddd") %> <%= getDates(i).toString("M/d") %></th>
+    <% } %>
+</tr>

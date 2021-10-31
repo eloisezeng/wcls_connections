@@ -1,0 +1,132 @@
+<%# Slideshow of schedules %>
+<script>
+    var slideIndex = 1;
+    showDivs(slideIndex);
+    
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+    
+    function showDivs(n) {
+      var i;
+      var x = document.getElementsByClassName("schedule");
+      if (n > x.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = x.length}
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";  
+      }
+      x[slideIndex-1].style.display = "block";  
+    }
+  </script>
+  
+<h1 class="mt-4">Full Schedule</h1>
+<a href="/dashboard" class="btn btn-info">My Schedule</a>
+<a href="/users/logout" class="btn btn-info" style="float: right">Logout</a>
+<p class="lead mb-3"><strong style="background-color: #e0c0f3;">Purple = PRIVATE</strong> | 
+    <strong style="background-color:#a2d8fb;">Blue = GROUP</strong> | 
+    <strong style="background-color:#9cf094;">Green = AVAILABLE FOR EITHER</strong>
+</p>
+<% const getDates = (num) => Date.today().setTimeToNow().add({ days: num }) %>
+<% getTimeSlots = (day) => { %>
+    <td>
+        <% all_teacher_users.map(users => { %>
+            <%# if the teacher has available/group timeslots, display them %>
+            <% if(users.schedule.filter((timeslot) => timeslot.day === day).length !== 0) { %>
+            <div style="padding: 5px; margin: 5px;">
+                <p style="margin: 5px;">
+                    <strong><%= users.user.name %>–</strong>
+                    <strong><%= users.user.edu === "teacher" ? "Teacher": "TA" %></strong>
+                </p>
+                <% users.schedule.filter((timeslot) => timeslot.day === day).map(timeslot => { %>
+                    <div class="<%= timeslot.status %>">
+                        <p>
+                            <%= timeslot.startTime %>–<%= timeslot.endTime %>
+                            <br><%= timeslot.students.length%>/<%= timeslot.max_students %> slots filled
+                            <br>Subject: <%= timeslot.subject %>
+                        </p>
+                        <% if(timeslot.students.length !== 0) { %>
+                            Students
+                            <% timeslot.students.map(student => { %>
+                                <details>
+                                    <summary><%= student.name %></summary>
+                                    WCLS grade: <%= student.wcls_grade %><br>
+                                    Regular grade: <%= student.reg_grade %>
+                                </details>
+                            <% }) %>  
+                    <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        <% }}) %>
+    </td>
+<% } %>
+<div class="w3-content w3-display-container" style="text-align: center;">
+    <div class="schedule">
+        <h3>Week <%= getDates(0).toString("M/d") %> to <%= getDates(6).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers'); %>
+            <tr>
+                <% for(let i = 0; i < 7; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div class="schedule" style="display: none;">
+        <h3>Week <%= getDates(7).toString("M/d") %> to <%= getDates(13).toString("M/d") %></h1>
+        <table>
+            <%- include('./partials/table_headers2'); %>
+            <tr>
+                <% for(let i = 7; i < 14; i++) { %>
+                    <% getTimeSlots(getDates(i).toString("M/d/yyyy")) %>
+                <% } %>
+            </tr>
+        </table>
+    </div>
+    <div style="text-align: center">
+        <button class="btn btn-info" onclick="plusDivs(-1)">&#10094;</button>
+        <button class="btn btn-info" onclick="plusDivs(1)">&#10095;</button>
+    </div>
+</div>
+<%- include('./partials/footer'); %>
+<style>
+    table {
+    border-collapse: collapse;
+    margin: 20px;
+    }
+    th {
+        border: 1px solid black;
+        padding: 5px;
+        text-align: center;
+    }
+    td {
+        border: 1px solid black;
+        padding: 5px;
+        margin: 5px;
+        vertical-align: top;
+        width: 500px;
+        height: 350px;
+    }
+    .available {
+        background-color: #9cf094;
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid black;
+        vertical-align: top;
+    }
+    .private {
+        background-color: #e0c0f3;
+        padding: 5px;
+        margin: 5px;
+        border: 1px solid black;
+        vertical-align: top;
+    }
+    .group {
+        background-color: #a2d8fb;
+        padding: 15px;
+        margin: 5px;
+        border: 1px solid black;
+        vertical-align: top;
+    }
+</style>
+    
